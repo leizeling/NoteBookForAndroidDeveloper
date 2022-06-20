@@ -16,13 +16,21 @@
 
 ### 2、RelativeLayout
 
+[Android RelativeLayout中控件动态定位](https://juejin.cn/post/7046017648651403278)
+
 ### 3、FrameLayout
 
 ### 4、ConstraintLayout
 
 ## 控件
 
+### RecyclerView
+
+[Android的clipToPadding与clipChildren](https://juejin.cn/post/7057545293252247566)
+
 ## View体系
+
+[Android View监听按键返回事件](https://juejin.cn/post/7044528606227202084)
 
 ## 动画
 
@@ -31,6 +39,24 @@
 ### 2、视图动画
 
 ### 3、属性动画
+
+## 资源
+
+## 适配
+
+### 深色模式
+
+### 大字体
+
+### 多语言
+
+### 镜像
+
+### 异形屏
+
+挖孔屏、折叠屏、平板
+
+[Android的WindowInsets](https://juejin.cn/post/7056314464445923364)
 
 ## 线程
 
@@ -45,6 +71,8 @@
 ### 1、AMS
 
 ### 2、WMS
+
+[Android的WindowManager](https://juejin.cn/post/7040318918971359239)
 
 ### 3、PMS
 
@@ -96,6 +124,8 @@ Observable在时间纬度上重新组织事件的能力
 
 ### 启动优化
 
+[【Android】Application的几点见解](https://juejin.cn/post/7087601351001112583)
+
 ### APK大小优化
 
 ### 内存优化
@@ -122,6 +152,8 @@ Aspect Oriented Programing面向切片编程
 
 ## Gradle
 
+[Android依赖冲突解决](https://juejin.cn/post/7042951122872434696)
+
 ## DeepLink
 
 ## Kotlin
@@ -146,7 +178,19 @@ Aspect Oriented Programing面向切片编程
 
 ### WorkManager
 
+## Android Studio
+
+[Android Studio查看Memery Indicator](https://juejin.cn/post/7044519584577093668)
+
 # 二、Java
+
+## 原始数据类型
+
+## 流程控制语句
+
+## 类、接口、枚举
+
+[Java创建对象的四种方式](https://juejin.cn/post/7079688614048694302)
 
 ## 集合
 
@@ -160,7 +204,15 @@ Aspect Oriented Programing面向切片编程
 
 ## 函数式编程
 
+## IO
 
+## 异常体系
+
+## 类加载
+
+## 垃圾收集GC
+
+## JDK工具
 
 
 # 三、设计模式
@@ -202,6 +254,8 @@ Aspect Oriented Programing面向切片编程
 ### 3、工厂模式
 
 ### 4、单例模式
+
+[【设计模式】单例创建的五种方式](https://juejin.cn/post/7086848388100161572)
 
 ### 5、抽象工厂模式
 
@@ -257,13 +311,23 @@ Aspect Oriented Programing面向切片编程
 
 # 五、数据结构
 
+## 数组
 
+## 链表
+
+[【代码设计】链表结构解决多流程校验](https://juejin.cn/post/7082300107256758280)
+
+## 树
+
+## 图
+
+## 哈希表
 
 # 六、算法
 
 ## 排序算法
 
-巧计：冒险选择插入相同的哈希值，为了尽快归来减少垃圾堆积
+巧计：冒险选择插入相同的哈希值，为了尽快归来减少垃圾堆积；[【算法】Java实现八种排序算法](https://juejin.cn/post/7083516064721534989)
 
 ### 1、冒泡排序
 
@@ -291,11 +355,29 @@ Aspect Oriented Programing面向切片编程
 
 # 八、工程化
 
+## 装机必备
+
+[【工程化】Android开发电脑中都装了哪些软件](https://juejin.cn/post/7092294455742447629)
+
+## 玩转Github
+
+[【工程化】上传Android项目到Github](https://juejin.cn/post/7085016774483116040)
+
 # 九、面试题
 
 # 十、学习资料
 
 ### Android方面
+
+《第一行代码》
+
+《Android开发艺术探索》
+
+《Android进阶之光》
+
+《Android进阶解密》
+
+《Android进阶指北》
 
 [BATcoder - 刘望舒](http://liuwangshu.cn)
 
@@ -303,24 +385,42 @@ JsonChao公众号
 
 ### Java方面
 
+《Effective Java》
+
 沉默王⼆-可能是2021年最全最硬核的Java面试 “备战” 资料（亮白版）
 
 [Java程序员进阶之路](https://tobebetterjavaer.com/)
 
-【扔物线课堂】HashMap源码解析
+Java核心知识点学习手册
 
-## 数据结构和算法方面
+[HOW2J.CN](https://how2j.cn/)
+
+### 数据结构和算法方面
+
+《算法图解》
 
 [LABULADONG 的算法网站](https://labuladong.gitee.io/algo/)
+
+[【扔物线课堂】HashMap源码解析](https://ke.qq.com/course/3323489#term_id=103454342)
 
 [菜鸟教程](https://www.runoob.com/w3cnote/sort-algorithm-summary.html)
 
 ### 重构方面
 
-书籍《重构 - 改善既有代码的设计》
+《重构 - 改善既有代码的设计》
 
 [31天重构学习笔记](https://www.cnblogs.com/KnightsWarrior/p/31DaysOfRefactoring.html)
+
+### 设计模式方面
+
+《Android源码设计模式解析与实战》
+
+极客时间-设计模式之美
 
 ### 计算机网络方面
 
 [小林coding-图解网络](https://www.xiaolincoding.com)
+
+## 技术文章方面
+
+[2022年博客阅读记录（围绕Android + Java）](https://juejin.cn/post/7056282748381560862)
