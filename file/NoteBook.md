@@ -214,12 +214,63 @@ Aspect Oriented Programing面向切片编程
 
 ## JDK工具
 
-
 # 三、设计模式
 
 ## 类的关系
 
 ### 1、依赖
+
+依赖关系最弱的一种；类A的某个成员方法的「返回值」、「形参」、「局部变量」是B，或者调用B的「静态方法」，则表示类A依赖了B，类B不会成为类A的成员属性，如下`CarFactory`对`Car`的依赖：
+
+```java
+public class Car {
+    private static final String TAG = "Car";
+
+    private String brand = "Audi";
+
+    public static String getTag() {
+        return TAG;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+}
+
+public class CarFactory {
+    // Car作为返回值
+    public Car create() {
+        return new Car();
+    }
+
+    // Car作为方法入参数
+    public void changeBrand(Car car) {
+        car.setBrand("BWM");
+    }
+
+    public String getCarDefaultBrand() {
+        // Car作为局部变量
+        Car car = new Car();
+        return car.getBrand();
+    }
+
+    public void printCarTag() {
+        // 调用Car的静态方法
+        System.out.println(Car.getTag());
+    }
+}
+```
+
+依赖关系使用`<..`虚线+箭头表示：
+
+```mermaid
+classDiagram
+Car <..  CarFactory
+```
 
 ### 2、关联
 
