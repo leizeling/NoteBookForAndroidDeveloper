@@ -114,6 +114,179 @@ Observable在时间纬度上重新组织事件的能力
 
 ## 组件化
 
+### AutoService
+
+App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`
+是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
+
+工程总共四个模块（实际项目中不同模块一般是分别属于不同的代码工程，通过maven等方式进行引用，这里为了方便直接写在一个工程中，模块通过生成jar包，并引用jar包来形成依赖），分别是`Account_Api`
+、`Account_Impl`、`MeModule`、`app`，其依赖关系如下
+
+<img src="../image/模块依赖关系.png" width="70%">
+
+可以看到业务模块`MeModule`只需要依赖接口模块`Account_Api`，并不用需要依赖其实现。下面来看看如何使用`AutoService`来实现。
+
+`Account_Api`模块中
+
+定义一个接口（该模块仅仅定义接口，没有实现）
+
+```java
+package com.example.account_api;
+
+public interface IAccount {
+    public String getName();
+}
+```
+
+在该模块的`build.gradle`文件中写如下脚本，用于生成jar包
+
+```groovy
+// Copy类型
+task A_makeJar(type: Copy) {
+    // 删除存在的
+    delete 'build/libs/account_api.jar'
+    // 设置拷贝的文件
+    from('build/intermediates/aar_main_jar/release/')
+    // 打进jar包后的文件目录
+    into('build/libs/')
+    // 将classes.jar放入build/libs/目录下
+    // include, exclude参数来设置过滤
+    //（我们只关心classes.jar这个文件）
+    include('classes.jar')
+    // 重命名
+    rename('classes.jar', 'account_api.jar')
+}
+
+A_makeJar.dependsOn(build)
+```
+
+可以在AS控制面板的右边看到对应名称的`task`，点击即可
+
+<img src="../image/task.png" width="50%">
+
+然后复制生成的`build/libs/jar`包到`MeModule`模块的`libs`文件夹下进行引用，记得需要在`build.gradle`文件中加上如下依赖才能生效
+
+```groovy
+dependencies {
+    implementation fileTree(dir: "libs", includes: ["*.jar"])
+}
+```
+
+`MeModule`调用接口示例代码
+
+```java
+package com.example.memodule;
+
+import com.example.account_api.IAccount;
+
+import java.util.ServiceLoader;
+
+public class MeCenter {
+    public static String getName() {
+        StringBuilder stringBuilder = new StringBuilder();
+        // 加载对应接口的所有实现类
+        ServiceLoader<IAccount> load = ServiceLoader.load(IAccount.class);
+        // 遍历所有实现类
+        for (IAccount iAccount : load) {
+            stringBuilder.append(iAccount.getName()).append(",");
+        }
+        return stringBuilder.toString();
+    }
+}
+```
+
+可以看到`MeModule`仅仅是引用了`Account_Api`模块。
+
+接着看`Account_Impl`这个实现接口的模块
+
+首先在`build.gradle`中添加依赖以及生成jar包的脚本
+
+```groovy
+dependencies {
+    implementation 'com.google.auto.service:auto-service:1.0-rc6'
+    // 用于根据注解AutoService生成对应的META—INF文件
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
+}
+
+// Copy类型
+task A_makeJar(type: Copy) {
+    // 删除存在的
+    delete 'build/libs/account_impl.jar'
+    // 设置拷贝的文件
+    from('build/intermediates/aar_main_jar/release/')
+    // 打进jar包后的文件目录
+    into('build/libs/')
+    // 将classes.jar放入build/libs/目录下
+    // include, exclude参数来设置过滤
+    //（我们只关心classes.jar这个文件）
+    include('classes.jar')
+    // 重命名
+    rename('classes.jar', 'account_impl.jar')
+}
+
+A_makeJar.dependsOn(build)
+```
+
+下面是`IAccount`接口的一个具体实现类
+
+```java
+package com.example.account_impl;
+
+import com.example.account_api.IAccount;
+import com.google.auto.service.AutoService;
+
+@AutoService(IAccount.class)
+public class AccountImpl implements IAccount {
+    @Override
+    public String getName() {
+        return "Jack";
+    }
+}
+```
+
+代码的关键是使用了注解`AutoService`
+，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
+
+```java
+package com.example.account_impl;
+
+import com.example.account_api.IAccount;
+import com.google.auto.service.AutoService;
+
+@AutoService(IAccount.class)
+public class AccountImplV1 implements IAccount {
+    @Override
+    public String getName() {
+        return "JackV1";
+    }
+}
+```
+
+编译该模块之后，可以看到会生成对应接口的一个META文件，里面的内容是对应接口的实现类完整路径
+
+<img src="../image/meta-inf.png" width="100%">
+
+`Account_Impl`模块打出来的jar包提供给app模块引用（如果不引用，可以想象最后的apk中是没有接口实现类的），同时app模块也引用MeModule模块。最后是app模块的测试代码
+
+```java
+package com.example.autoservice;
+
+import com.example.memodule.MeCenter;
+
+class Test {
+    public static void main(String[] args) {
+        System.out.println("name: " + MeCenter.getName());
+    }
+}
+
+// 输出为
+// name: Jack,JackV1,
+```
+
+从输出可以看出两点，第一是确实调用到了具体的接口实现，第二是接口实现是可以有多个的。
+
+以上就是AutoService的简单使用了，是不是感觉实现组件化，接口的暴露与实现的隐藏也没那么复杂了。
+
 ## 动态化
 
 ## 跨平台
@@ -220,7 +393,8 @@ Aspect Oriented Programing面向切片编程
 
 ### 1、依赖
 
-依赖关系最弱的一种；类A的某个成员方法的「返回值」、「形参」、「局部变量」是B，或者调用B的「静态方法」，则表示类A依赖了B，类B不会成为类A的成员属性，如下`CarFactory`对`Car`的依赖：
+依赖关系最弱的一种；类A的某个成员方法的「返回值」、「形参」、「局部变量」是B，或者调用B的「静态方法」，则表示类A依赖了B，类B不会成为类A的成员属性，如下`CarFactory`对`Car`
+的依赖：
 
 ```java
 public class Car {
