@@ -22,6 +22,10 @@
 
 ### 4、ConstraintLayout
 
+### 5、CoordinatorLayout
+
+### 6、CoordinatorLayout
+
 ## 控件
 
 ### RecyclerView
@@ -44,21 +48,87 @@
 
 ## 适配
 
-### 深色模式
+### 1、深色模式
 
-### 大字体
+### 2、大字体
 
-### 多语言
+### 3、多语言
 
-### 镜像
+### 4、镜像
 
-### 异形屏
+### 5、异形屏
 
 挖孔屏、折叠屏、平板
 
 [Android的WindowInsets](https://juejin.cn/post/7056314464445923364)
 
 ## 线程
+
+创建线程的三种方式分别是：
+
+* 实现Runnable
+
+* 继承Thread
+
+* 实现Callable，使用FutureTask封装，然后FutureTask的get()方法获取返回值
+
+  该方案适用于想要有返回值的场景。
+
+下面给出具体的实现代码样例
+
+```java
+
+class ThreadTest {
+    public static void main(String[] args) {
+        createThreadMethodOne();
+        createThreadMethodTwo();
+        createThreadMethodThree();
+    }
+
+    // 方法1：实现Runnable
+    private static void createThreadMethodOne() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("create thread method one.");
+            }
+        });
+        thread.start();
+    }
+
+    // 方法2：继承Thread
+    private static void createThreadMethodTwo() {
+        new ThreadTwo().start();
+    }
+
+    private static class ThreadTwo extends Thread {
+        @Override
+        public void run() {
+            System.out.println("create thread method two.");
+        }
+    }
+
+    // 方法3：实现Callable，使用FutureTask封装，然后FutureTask的get()方法获取返回值
+    private static void createThreadMethodThree() {
+        FutureTask<String> futureTask = new FutureTask<>(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return "create thread method three.";
+            }
+        });
+        Thread thread = new Thread(futureTask);
+        thread.start();
+        try {
+            String result = futureTask.get();
+            System.out.println(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+虽然创建线程有上面三种方案，但在实际场景中，由于直接创建线程会导致线程的数量难以控制，同时创建线程右比较消耗性能的，所以有了线程池的概念。
 
 ## 进程间通信
 
@@ -116,8 +186,7 @@ Observable在时间纬度上重新组织事件的能力
 
 ### AutoService
 
-App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`
-是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
+App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
 
 工程总共四个模块（实际项目中不同模块一般是分别属于不同的代码工程，通过maven等方式进行引用，这里为了方便直接写在一个工程中，模块通过生成jar包，并引用jar包来形成依赖），分别是`Account_Api`
 、`Account_Impl`、`MeModule`、`app`，其依赖关系如下
@@ -244,8 +313,7 @@ public class AccountImpl implements IAccount {
 }
 ```
 
-代码的关键是使用了注解`AutoService`
-，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
+代码的关键是使用了注解`AutoService`，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
 
 ```java
 package com.example.account_impl;
