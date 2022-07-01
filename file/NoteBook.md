@@ -62,7 +62,9 @@
 
 [Android的WindowInsets](https://juejin.cn/post/7056314464445923364)
 
-## 线程
+## 线程与线程池
+
+### 线程
 
 创建线程的三种方式分别是：
 
@@ -128,7 +130,90 @@ class ThreadTest {
 }
 ```
 
-虽然创建线程有上面三种方案，但在实际场景中，由于直接创建线程会导致线程的数量难以控制，同时创建线程右比较消耗性能的，所以有了线程池的概念。
+虽然创建线程有上面三种方案，但在实际场景中，由于直接创建线程会导致线程的数量难以控制，同时创建线程又比较消耗资源的，所以有了线程池的概念。
+
+### 线程池
+
+创建线程池的类是`ThreadPoolExecutor`，如下所示
+
+```java
+public class ThreadPoolTest {
+    public static void main(String[] args) {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 20, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), Executors.defaultThreadFactory());
+        for (int i = 0; i < 10; i++) {
+            int task = i;
+            threadPoolExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("thread " + Thread.currentThread().getName() + " execute " + "task " + task);
+                }
+            });
+        }
+    }
+}
+
+```
+
+输出如下
+
+```
+
+thread pool-1-thread-1 execute task 0
+thread pool-1-thread-2 execute task 1
+thread pool-1-thread-3 execute task 2
+thread pool-1-thread-4 execute task 3
+thread pool-1-thread-5 execute task 4
+thread pool-1-thread-1 execute task 5
+thread pool-1-thread-2 execute task 6
+thread pool-1-thread-2 execute task 8
+thread pool-1-thread-4 execute task 9
+thread pool-1-thread-3 execute task 7
+```
+
+可以看出，多线程中，task创建的顺序和在线程池中被线程执行的顺序不一定是一致的，后面创建的task可能被先执行。
+
+下面逐一看`ThreadPoolExecutor`构造参数
+
+|      参数      |    含义    |                             说明                             |
+| :-------------: | :--------: | :----------------------------------------------------------: |
+|  `corePoolSize`  | 核心线程数 | 默认情况下，核心线程会一直存活（即使是空闲状态），除非设置了`allowCoreThreadTimeOut`为true，keepAliveTime将会作用于核心线程 |
+| `maximumPoolSize` | 最大线程数 | 当活动线程达到该值后，后续新任务会被阻塞，具体阻塞策略看线程池的`RejectedExecutionHandler`参数实现类 |
+|  `keepAliveTime`  | 非核心线程的闲置超时时间 | 超过该时常，非核心线程将会被回收，当设置了allowCoreThreadTimeOut为true，该参数对核心线程同样适用 |
+|      `unit`      | `keepAliveTime`参数的时间单位 | 如`TimeUnit.MILLISECONDS`，`TimeUnit.SECONDS`，`TimeUnit.MINUTES` |
+|    `workQueue`    | 任务队列 | 通过线程池的`execute()`方法提交的`Runnable`对象将存放在该参数中 |
+|  `threadFactory`  | 线程工厂 | 用于为线程池创建线程 |
+
+`RejectedExecutionHandler`主要有如下几个实现子类，当然也可以自定义实现
+
+|         类          |                             特点                             |
+| :-----------------: | :----------------------------------------------------------: |
+|     AbortPolicy     |  不执行提交的task，直接抛出`RejectedExecutionException`异常  |
+|    DiscardPolicy    |                静默的扔提交的task，无任何响应                |
+| DiscardOldestPolicy | 移除任务队列中最早的task，然后将新提交的task添加到任务队列中 |
+|  CallerRunsPolicy   |       直接使用线程池调用方所在的线程执行task的run方法        |
+
+想知道线程池的构造参数是如何相互配合的，就需要了解线程池的工作原理
+
+```mermaid
+graph TB
+ending("结束")
+a("提交一个任务") --> b{"线程池中的线程数 >= 核心线程数？<br>corePoolSize"}
+b --N--> c[创建一个核心线程处理任务<br>即使有核心线程是空闲状态]
+c --> ending
+b --Y--> d{"任务队列是否已满？<br>workQueue"}
+d --N--> e[任务被放到任务队列中等待]
+e --> ending
+d --Y--> f{"线程池中的线程数 >= 最大线程数？<br>maximumPoolSize"}
+f --N--> g["创建一个新线程处理任务<br>非核心线程"]
+g --> ending
+f --Y--> h["任务无法执行"]
+h --> i["通过RejectedExecutionHandler策略来处理任务"]
+i --> ending
+```
+
+通过流程图，可以看出处理任务的优先级是：核心线程 > 任务队列 >
+最大线程池。另外当线程池的线程数大于核心线程数时，即存在非核心线程时，当其空闲时间超过了闲置超时时常，将会被终止；核心线程是否会终止取决于是否设置了`allowCoreThreadTimeOut`
+为true，核心线程默认是不会被终止的。
 
 ## 进程间通信
 
@@ -186,7 +271,8 @@ Observable在时间纬度上重新组织事件的能力
 
 ### AutoService
 
-App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
+App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`
+是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
 
 工程总共四个模块（实际项目中不同模块一般是分别属于不同的代码工程，通过maven等方式进行引用，这里为了方便直接写在一个工程中，模块通过生成jar包，并引用jar包来形成依赖），分别是`Account_Api`
 、`Account_Impl`、`MeModule`、`app`，其依赖关系如下
@@ -313,7 +399,8 @@ public class AccountImpl implements IAccount {
 }
 ```
 
-代码的关键是使用了注解`AutoService`，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
+代码的关键是使用了注解`AutoService`
+，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
 
 ```java
 package com.example.account_impl;
