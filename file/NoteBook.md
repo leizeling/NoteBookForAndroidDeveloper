@@ -24,7 +24,7 @@
 
 ### 5、CoordinatorLayout
 
-### 6、CoordinatorLayout
+### 6、MotionLayout
 
 ## 控件
 
@@ -68,11 +68,11 @@
 
 创建线程的三种方式分别是：
 
-* 实现Runnable
+* 实现`Runnable`
 
-* 继承Thread
+* 继承`Thread`
 
-* 实现Callable，使用FutureTask封装，然后FutureTask的get()方法获取返回值
+* 实现`Callable`，使用`FutureTask`封装，然后`FutureTask`的`get()`方法获取返回值
 
   该方案适用于想要有返回值的场景。
 
@@ -156,8 +156,7 @@ public class ThreadPoolTest {
 
 输出如下
 
-```
-
+```systemverilog
 thread pool-1-thread-1 execute task 0
 thread pool-1-thread-2 execute task 1
 thread pool-1-thread-3 execute task 2
@@ -176,21 +175,21 @@ thread pool-1-thread-3 execute task 7
 
 |      参数      |    含义    |                             说明                             |
 | :-------------: | :--------: | :----------------------------------------------------------: |
-|  `corePoolSize`  | 核心线程数 | 默认情况下，核心线程会一直存活（即使是空闲状态），除非设置了`allowCoreThreadTimeOut`为true，keepAliveTime将会作用于核心线程 |
+|  `corePoolSize`  | 核心线程数 | 默认情况下，核心线程会一直存活（即使是空闲状态），除非设置了`allowCoreThreadTimeOut`为`true`，`keepAliveTime`将会作用于核心线程 |
 | `maximumPoolSize` | 最大线程数 | 当活动线程达到该值后，后续新任务会被阻塞，具体阻塞策略看线程池的`RejectedExecutionHandler`参数实现类 |
-|  `keepAliveTime`  | 非核心线程的闲置超时时间 | 超过该时常，非核心线程将会被回收，当设置了allowCoreThreadTimeOut为true，该参数对核心线程同样适用 |
+|  `keepAliveTime`  | 非核心线程的闲置超时时间 | 超过该时常，非核心线程将会被回收，当设置了`allowCoreThreadTimeOut`为`true`，该参数对核心线程同样适用 |
 |      `unit`      | `keepAliveTime`参数的时间单位 | 如`TimeUnit.MILLISECONDS`，`TimeUnit.SECONDS`，`TimeUnit.MINUTES` |
 |    `workQueue`    | 任务队列 | 通过线程池的`execute()`方法提交的`Runnable`对象将存放在该参数中 |
 |  `threadFactory`  | 线程工厂 | 用于为线程池创建线程 |
 
 `RejectedExecutionHandler`主要有如下几个实现子类，当然也可以自定义实现
 
-|         类          |                             特点                             |
-| :-----------------: | :----------------------------------------------------------: |
-|     AbortPolicy     |  不执行提交的task，直接抛出`RejectedExecutionException`异常  |
-|    DiscardPolicy    |                静默的扔提交的task，无任何响应                |
-| DiscardOldestPolicy | 移除任务队列中最早的task，然后将新提交的task添加到任务队列中 |
-|  CallerRunsPolicy   |       直接使用线程池调用方所在的线程执行task的run方法        |
+|          类           |                             特点                             |
+| :-------------------: | :----------------------------------------------------------: |
+|     `AbortPolicy`     | 不执行提交的`task`，直接抛出`RejectedExecutionException`异常 |
+|    `DiscardPolicy`    |               静默的扔提交的`task`，无任何响应               |
+| `DiscardOldestPolicy` | 移除任务队列中最早的`task`，然后将新提交的`task`添加到任务队列中 |
+|  `CallerRunsPolicy`   |     直接使用线程池调用方所在的线程执行`task`的`run`方法      |
 
 想知道线程池的构造参数是如何相互配合的，就需要了解线程池的工作原理
 
@@ -198,22 +197,20 @@ thread pool-1-thread-3 execute task 7
 graph TB
 ending("结束")
 a("提交一个任务") --> b{"线程池中的线程数 >= 核心线程数？<br>corePoolSize"}
-b --N--> c[创建一个核心线程处理任务<br>即使有核心线程是空闲状态]
+b --NO--> c[创建一个核心线程处理任务<br>即使有核心线程是空闲状态]
 c --> ending
-b --Y--> d{"任务队列是否已满？<br>workQueue"}
-d --N--> e[任务被放到任务队列中等待]
+b --YES--> d{"任务队列是否已满？<br>workQueue"}
+d --NO--> e[任务被放到任务队列中等待]
 e --> ending
-d --Y--> f{"线程池中的线程数 >= 最大线程数？<br>maximumPoolSize"}
-f --N--> g["创建一个新线程处理任务<br>非核心线程"]
+d --YES--> f{"线程池中的线程数 >= 最大线程数？<br>maximumPoolSize"}
+f --NO--> g["创建一个新线程处理任务<br>非核心线程"]
 g --> ending
-f --Y--> h["任务无法执行"]
+f --YES--> h["任务无法执行"]
 h --> i["通过RejectedExecutionHandler策略来处理任务"]
 i --> ending
 ```
 
-通过流程图，可以看出处理任务的优先级是：核心线程 > 任务队列 >
-最大线程池。另外当线程池的线程数大于核心线程数时，即存在非核心线程时，当其空闲时间超过了闲置超时时常，将会被终止；核心线程是否会终止取决于是否设置了`allowCoreThreadTimeOut`
-为true，核心线程默认是不会被终止的。
+通过流程图，可以看出处理任务的优先级是：**核心线程** > **任务队列** >**最大线程数**。另外当线程池的线程数大于核心线程数时，即存在非核心线程时，当其空闲时间超过了闲置超时时常，将会被终止；核心线程是否会终止取决于是否设置了`allowCoreThreadTimeOut`为`true`，核心线程默认是不会被终止的。
 
 ## 进程间通信
 
@@ -243,11 +240,7 @@ i --> ending
 
 ### Rxjava
 
-异步框架、链式调用
-
-Observable在空间纬度上重新组织事件的能力
-
-Observable在时间纬度上重新组织事件的能力
+异步框架、链式调用；Observable在空间纬度上重新组织事件的能力；Observable在时间纬度上重新组织事件的能力。
 
 参考博客：「给Android开发者的RxJava详解」、「RxJava沉思录：用了这么久，你认为RxJava真的好用吗」
 
@@ -271,10 +264,9 @@ Observable在时间纬度上重新组织事件的能力
 
 ### AutoService
 
-App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`
-是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
+App组件化过程中，需要合理解决组件间的依赖，组件间应做到合理的暴露接口和隐藏实现细节。`AutoService`是Google官方提供的暴露接口，隐藏实现的解决方案。下面通过一个案例来进行`AutoService`使用说明：
 
-工程总共四个模块（实际项目中不同模块一般是分别属于不同的代码工程，通过maven等方式进行引用，这里为了方便直接写在一个工程中，模块通过生成jar包，并引用jar包来形成依赖），分别是`Account_Api`
+工程总共四个模块（实际项目中不同模块一般是分别属于不同的代码工程，通过`maven`等方式进行引用，这里为了方便直接写在一个工程中，模块通过生成jar包，并引用jar包来形成依赖），分别是`Account_Api`
 、`Account_Impl`、`MeModule`、`app`，其依赖关系如下
 
 <img src="../image/模块依赖关系.png" width="70%">
@@ -289,7 +281,7 @@ App组件化过程中，需要合理解决组件间的依赖，组件间应做�
 package com.example.account_api;
 
 public interface IAccount {
-    public String getName();
+    String getName();
 }
 ```
 
@@ -399,8 +391,7 @@ public class AccountImpl implements IAccount {
 }
 ```
 
-代码的关键是使用了注解`AutoService`
-，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
+代码的关键是使用了注解`AutoService`，注解的括号内填写该类具体是实现哪个接口。另外注意，一个接口是可以有多个实现的（不过一般实际业务中习惯对外暴露的接口内部是一个实现类），如下是上面接口的另一个实现
 
 ```java
 package com.example.account_impl;
@@ -421,7 +412,7 @@ public class AccountImplV1 implements IAccount {
 
 <img src="../image/meta-inf.png" width="100%">
 
-`Account_Impl`模块打出来的jar包提供给app模块引用（如果不引用，可以想象最后的apk中是没有接口实现类的），同时app模块也引用MeModule模块。最后是app模块的测试代码
+`Account_Impl`模块打出来的jar包提供给`app`模块引用（如果不引用，可以想象最后的apk中是没有接口实现类的），同时`app`模块也引用`MeModule`模块。最后是app模块的测试代码
 
 ```java
 package com.example.autoservice;
@@ -548,8 +539,7 @@ Aspect Oriented Programing面向切片编程
 
 ### 1、依赖
 
-依赖关系最弱的一种；类A的某个成员方法的「返回值」、「形参」、「局部变量」是B，或者调用B的「静态方法」，则表示类A依赖了B，类B不会成为类A的成员属性，如下`CarFactory`对`Car`
-的依赖：
+依赖关系最弱的一种；类A的某个成员方法的「返回值」、「形参」、「局部变量」是B，或者调用B的「静态方法」，则表示类A依赖了B，类B不会成为类A的成员属性，如下`CarFactory`对`Car`的依赖：
 
 ```java
 public class Car {
@@ -625,7 +615,7 @@ Car <..  CarFactory
 
 ## 创建型
 
-巧记：原来的建设工人单独抽奖
+巧记：**原来的建设工人单独抽奖**
 
 ### 1、原型模式
 
@@ -641,7 +631,7 @@ Car <..  CarFactory
 
 ## 结构型
 
-巧记：带上适当的装备组合，可以让外国侨胞享受游戏
+巧记：**带上适当的装备组合，可以让外国侨胞享受游戏**
 
 ### 1、代理模式
 
@@ -659,7 +649,7 @@ Car <..  CarFactory
 
 ## 行为型
 
-巧记：多次的命令和责备中，车模见状慌忙解开衣物
+巧记：**多次的命令和责备中，车模见状慌忙解开衣物**
 
 ### 1、迭代器模式
 
@@ -707,7 +697,7 @@ Car <..  CarFactory
 
 ## 排序算法
 
-巧计：冒险选择插入相同的哈希值，为了尽快归来减少垃圾堆积；[【算法】Java实现八种排序算法](https://juejin.cn/post/7083516064721534989)
+巧计：**冒险选择插入相同的哈希值，为了尽快归来减少垃圾堆积**；[【算法】Java实现八种排序算法](https://juejin.cn/post/7083516064721534989)
 
 ### 1、冒泡排序
 
