@@ -169,7 +169,7 @@ thread pool-1-thread-4 execute task 9
 thread pool-1-thread-3 execute task 7
 ```
 
-可以看出，多线程中，task创建的顺序和在线程池中被线程执行的顺序不一定是一致的，后面创建的task可能被先执行。
+可以看出，多线程中，`task`创建的顺序和在线程池中被线程执行的顺序不一定是一致的，后面创建的`task`可能被先执行。
 
 下面逐一看`ThreadPoolExecutor`构造参数
 
@@ -187,14 +187,14 @@ thread pool-1-thread-3 execute task 7
 |          类           |                             特点                             |
 | :-------------------: | :----------------------------------------------------------: |
 |     `AbortPolicy`     | 不执行提交的`task`，直接抛出`RejectedExecutionException`异常 |
-|    `DiscardPolicy`    |               静默的扔提交的`task`，无任何响应               |
+|    `DiscardPolicy`    |              静默的扔掉提交的`task`，无任何响应              |
 | `DiscardOldestPolicy` | 移除任务队列中最早的`task`，然后将新提交的`task`添加到任务队列中 |
 |  `CallerRunsPolicy`   |     直接使用线程池调用方所在的线程执行`task`的`run`方法      |
 
 想知道线程池的构造参数是如何相互配合的，就需要了解线程池的工作原理
 
 ```mermaid
-graph TB
+graph TD
 ending("结束")
 a("提交一个任务") --> b{"线程池中的线程数 >= 核心线程数？<br>corePoolSize"}
 b --NO--> c[创建一个核心线程处理任务<br>即使有核心线程是空闲状态]
@@ -211,6 +211,169 @@ i --> ending
 ```
 
 通过流程图，可以看出处理任务的优先级是：**核心线程** > **任务队列** >**最大线程数**。另外当线程池的线程数大于核心线程数时，即存在非核心线程时，当其空闲时间超过了闲置超时时常，将会被终止；核心线程是否会终止取决于是否设置了`allowCoreThreadTimeOut`为`true`，核心线程默认是不会被终止的。
+
+由于`ThreadPoolExecutor`的构造函数需要传递多个参数，如果合理的设定又有一定的难度，所以平时在实际使用中通常情况下并不直接使用`ThreadPoolExecutor`来创建线程池，而是使用Java已经内置的四种类型的线程池（即部分参数已经配置好，只需要配置未配置的参数）；下面是这几种线程池的特点以及相应的使用场景
+
+|                 类型                 |                             特点                             |                  使用场景                  |
+| :----------------------------------: | :----------------------------------------------------------: | :----------------------------------------: |
+| `SingleThreadExecutor`单线程化线程池 | 线程数量固定**1个**（1个核心线程，无非核心线程）；任务队列无大小限制 | 单线程，需要任务严格按照**顺序执行**的场景 |
+|     `FixedThreadPool`定长线程池      | 线程数量固定（核心线程固定，无非核心线程）；任务队列无大小限制 |           **控制线程最大并发数**           |
+| `ScheduledExecutorService`定时线程池 | 线程数量不定（核心线程固定，非核心线程数量无限制（闲置马上回收））； |        执行**定时**或**周期性**任务        |
+|     `CachedThreadPool`缓存线程池     | 线程数量不定（无核心线程，非核心线程数量不定）；由于都是非核心线程，所以只有无线程可用时才新建线程；有线程空闲时直接使用空闲线程；灵活回收空闲线程该（默认60秒超时，全部线程回收时，线程池将几乎不占用系统资源） |      执行**数量多**、**耗时少**的任务      |
+
+`SingleThreadExecutor`创建示例
+
+```java
+public class ThreadPoolTest1 {
+    public static void main(String[] args) {
+        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+        for (int i = 0; i < 10; i++) {
+            int task = i;
+            singleThreadExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("thread " + Thread.currentThread().getName() + " execute " + "task " + task);
+                }
+            });
+        }
+    }
+}
+```
+
+输出如下
+
+```systemverilog
+thread pool-1-thread-1 execute task 0
+thread pool-1-thread-1 execute task 1
+thread pool-1-thread-1 execute task 2
+thread pool-1-thread-1 execute task 3
+thread pool-1-thread-1 execute task 4
+thread pool-1-thread-1 execute task 5
+thread pool-1-thread-1 execute task 6
+thread pool-1-thread-1 execute task 7
+thread pool-1-thread-1 execute task 8
+thread pool-1-thread-1 execute task 9
+```
+
+从输出可以看出，`task`是严格按照提交的顺序执行的。
+
+`FixedThreadPool`创建示例
+
+```java
+public class ThreadPoolTest2 {
+    public static void main(String[] args) {
+        ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
+        for (int i = 0; i < 10; i++) {
+            int task = i;
+            fixedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("thread " + Thread.currentThread().getName() + " execute " + "task " + task);
+                }
+            });
+        }
+    }
+}
+```
+
+输出
+
+```systemverilog
+thread pool-1-thread-2 execute task 1
+thread pool-1-thread-1 execute task 0
+thread pool-1-thread-3 execute task 2
+thread pool-1-thread-4 execute task 3
+thread pool-1-thread-5 execute task 4
+thread pool-1-thread-2 execute task 5
+thread pool-1-thread-1 execute task 6
+thread pool-1-thread-1 execute task 9
+thread pool-1-thread-3 execute task 8
+thread pool-1-thread-2 execute task 7
+```
+
+从输出可以看出，也再次说明在多线程中，`task`创建的顺序和在线程池中被线程执行的顺序不一定是一致的。
+
+`ScheduledExecutorService`创建示例
+
+```java
+public class ThreadPoolTest3 {
+    public static void main(String[] args) {
+        System.out.println("start time: " + System.currentTimeMillis());
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(5);
+        Runnable delayTask = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("delayTask current time: " + System.currentTimeMillis());
+            }
+        };
+        // 延时5秒执行该任务
+        scheduledExecutorService.schedule(delayTask, 5, TimeUnit.SECONDS);
+
+        Runnable periodTask = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("periodTask current time: " + System.currentTimeMillis());
+            }
+        };
+        // 延时10秒后开始以1秒为周期重复执行任务
+        scheduledExecutorService.scheduleAtFixedRate(periodTask, 10, 1, TimeUnit.SECONDS);
+    }
+}
+```
+
+输出如下
+
+```systemverilog
+start time: 1656749188976
+delayTask current time: 1656749193989
+periodTask current time: 1656749198990
+periodTask current time: 1656749199990
+periodTask current time: 1656749200990
+periodTask current time: 1656749201990
+periodTask current time: 1656749202990
+periodTask current time: 1656749203990
+...
+```
+
+可以看到，该线程池可以延迟执行任务（调用`schedule()`方法），以及周期性执行任务（调用`scheduleAtFixedRate()`方法）。
+
+`CachedThreadPool`创建示例
+
+```java
+public class ThreadPoolTest4 {
+    public static void main(String[] args) {
+        ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+        for (int i = 0; i < 10; i++) {
+            int task = i;
+            cachedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("thread " + Thread.currentThread().getName() + " execute " + "task " + task);
+                }
+            });
+        }
+    }
+}
+```
+
+输出
+
+```systemverilog
+thread pool-1-thread-1 execute task 0
+thread pool-1-thread-1 execute task 1
+thread pool-1-thread-1 execute task 3
+thread pool-1-thread-2 execute task 2
+thread pool-1-thread-2 execute task 5
+thread pool-1-thread-3 execute task 4
+thread pool-1-thread-1 execute task 6
+thread pool-1-thread-1 execute task 8
+thread pool-1-thread-3 execute task 7
+thread pool-1-thread-2 execute task 9
+```
+
+从中可以看到，线程池只创建了3个线程来执行这些任务，即优先使用已有线程来执行任务。
+
+在了解了以上几种线程池之后，工作中就可以根据实际的业务场景进行合理的选择使用了。
 
 ## 进程间通信
 
