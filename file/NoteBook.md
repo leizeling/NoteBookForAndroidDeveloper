@@ -54,6 +54,48 @@
 
 ### 3、多语言
 
+#### 数字的本地化适配
+
+经常会碰到数字在不同的国家地区需要展示成当地的样式（并不是每个国家或地区都是使用阿拉伯数字的），以及货币如何本地化展示？百分比的**%**是写在字符串里，还是可以直接有方法生成呢？
+
+以上这些问题都可以使用Java提供的`java.text.NumberFormat`解决，下面是几个简单的样例：
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        // 获取数字格式化实例 获取实例时都可以设置Locale设置特定的国家或地区，或者随系统变化（实际一般随系统变化）
+        NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
+        // 设置保留的最大的小数位数
+        numberFormat.setMaximumFractionDigits(1);
+        System.out.println("数字格式化: " + numberFormat.format(123.456));
+
+        // 获取整数格式化实例
+        NumberFormat integerInstance = NumberFormat.getIntegerInstance();
+        System.out.println("整数格式化: " + integerInstance.format(123.456));
+
+        // 获取百分数格式化实例
+        NumberFormat percentInstance = NumberFormat.getPercentInstance();
+        // 设置保留的最小的小数位数
+        percentInstance.setMinimumFractionDigits(4);
+        System.out.println("百分数格式化: " + percentInstance.format(0.12345));
+
+        // 获取货币格式化实例
+        NumberFormat currencyInstance = NumberFormat.getCurrencyInstance(Locale.CHINA);
+        currencyInstance.setMinimumFractionDigits(4);
+        System.out.println("货币格式化: " + currencyInstance.format(123.456));
+    }
+}
+```
+
+输出：
+
+```systemverilog
+数字格式化: 123.5
+整数格式化: 123
+百分数格式化: 12.3450%
+货币格式化: ￥123.4560
+```
+
 ### 4、镜像
 
 ### 5、异形屏
