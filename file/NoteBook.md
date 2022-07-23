@@ -69,7 +69,7 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
 
    调用`View`的`layout（getLeft() + offsetX，getTop() + offsetY, getRight() + offsetX, getBottom() + offsetY）`，设置View上下左右的位置，其中`offsetX/offsetY`是手势移动的距离。
 
-2. #### `offsetLeftAndRight()`与`offsetTopAndBottom()`
+2. `offsetLeftAndRight()`与`offsetTopAndBottom()`
 
    使用了第一种`layout`类似。
 
@@ -139,6 +139,52 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
    ```
 
    `Scroller`起到了类似属性动画中估值器的作用，根据需要移动的距离，以及所需要的时间，计算出当前时间节点`View`需要移动到的坐标位置，最后再借助`View`的`scrollTo`方法实现移动，这里需要注意，其实是当前`View`的父容器去调用`scrollTo`的。使用时只需要调用该自定义`View`新增的`smoothScrollTo`即可。
+
+### 事件分发机制
+
+#### 三个重要方法
+
+|                  方法                   |                             备注                             |
+| :-------------------------------------: | :----------------------------------------------------------: |
+|  `dispatchTouchEvent(MotionEvent ev)`   |                       用来进行事件分发                       |
+| `onInterceptTouchEvent(MotionEvent ev)` | 用来进行事件的拦截，在`dispatchTouchEvent()`方法中调用；<br />`View`没有提供该方法，该方法是在`ViewGroup`中；<br />返回`true`：拦截；返回`false`：不拦截，默认不拦截；<br />如果拦截了，则走当前`ViewGroup`的`onTouchEvent()`方法。 |
+|        `onTouchEvent(Motion Ev)`        |     用来处理点击事件，在`dispatchTouchEvent()`方法中调用     |
+
+#### 触摸事件由上往下的传递
+
+1. 用来处理触摸事件，在`dispatchTouchEvent()`方法中调用；
+2. `ViewGroup`一般只考虑`onInterceptTouchEvent()`方法，因为一般我们不会去重写`dispatchTouchEvent()`方法；
+3. 根`ViewGroup`首先把点击事件交给`dispatchTouchEvent()`方法，如果该`ViewGroup`的`onInterceptTouchEvent()`返回`true`则交给自身的`onTouchEvent()`处理，否则传递给子元素的`dispatchTouchEvent()`处理，如此反复，直到最底层`View`，`View`的`dispatchTouchEven()`一般最终会调用`onTouchEvent()`。
+
+#### 事件处理由下往上的传递
+
+1. 最底层的`View`的`onTouchEvent`返回`true`，则表示消费了事件；返回`false`，表示不做处理，则传递给父`View`的`onTouchEvent`处理，如果父`View`的`onTouchEvent`还是返回`false`，则继续向上传递，如此反复；
+2. 如果给`View`添加了`onTouchListener`并且`onTouch`返回了`true`，则`View`的`onTouchEvent`方法不会被调用，即前者的优先级高于后者；
+3. 如果给`View`添加了`onClickListener`，则在执行`onTouchEvent`方法时会去执行`OnClickListener`的`onClick`方法，即`onClick`的优先级最低；
+4. `View`的`OnTouchEvent`方法默认都会返回`true`，除非它是不可点击的`CLICLABLE`和`LONG_CLICLABLE`都为`false`，通过`OnClickLinstener`会自动将`CLICLABLE`置为`true`。
+
+#### `onTouch()`和`onTouchEvent()`
+
+相同点：
+
+- 都是在`View`的`dispatchTouchEvent`中调用，前者的优先级高于后者；
+- 都是`View`中处理触摸事件的`API`；
+
+不同点：
+
+- `onTouch()`是`onTouchListener`接口中的函数，需要用户自己实现，`onTouchEvent()`是`View`自带的接口，`Android`提供了默认实现，子`View`可进行覆写。
+
+#### `onTouchListener`的`onTouch()`和`Activity`的`onTouchEvent()`
+
+- 如果`onTouchListener`的`onTouch()`方法返回`true`，手放在`View`上时，`onTouch`会一遍一遍的调用；
+- 如果`onTouchListener`的`onTouch()`方法返回`false`，手放在`View`上时，`onTouch()`会执行一遍，`Activity`的`onTouchEvent()`会一遍一遍的执行;
+- 如果手放在`View`之外，`Activity`的`onTouchEvent()`会一遍一遍的执行。
+
+#### 总结
+
+`View`的事件分发机制简单来说就是一种从根节点到叶子结点的多叉`View`树遍历。同时提供了拦截机制以及根据各主要方法返回值来保证流程的可控性。各个主要对外暴露方法的优先级如下：
+
+`dispatchTouchEvent` > `onInterceptTouchEvent`（只在`ViewGroup`中有） > `onTouch`（通过`onTouchListener`） > `onTouchEvent` >`onClick`（通过`OnClickListener`）。
 
 ## 动画
 
