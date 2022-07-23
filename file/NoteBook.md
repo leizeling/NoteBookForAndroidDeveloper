@@ -36,6 +36,110 @@
 
 [Android View监听按键返回事件](https://juejin.cn/post/7044528606227202084)
 
+### View的简介
+
+View是Android所有控件的基类，同时ViewGroup也是继承自View。
+
+### 坐标系
+
+####  Android坐标系
+
+* 以**屏幕**的左上角为起点；
+* 通过`MotionEvent`类的`getRawX()`和`getRawY()`获取的。
+
+#### 视图坐标系
+
+* 以**父布局**的左上角作为起点；
+
+* `View`通过`getHeight()`和`getWidth()`获取自身的宽高；
+
+* `View`通过`getLeft()`、`getTop()`、`getBottom()`和`getRight()`获取View自身左上下右边到**父布局坐标原点**的距离；
+
+* `MotionEvent`的`getX()`、`getY()`获取按下位置距离**View自身原点**的距离。
+
+### View的滑动
+
+#### 基本思想
+
+当触摸事件传递到`View`时，系统记录下触摸点的坐标，手指移动时记录下移动后的触摸的坐标并计算偏移量，并通过偏移量来修改View的坐标。
+
+#### 实现方案
+
+1. `layout`
+
+   调用`View`的`layout（getLeft() + offsetX，getTop() + offsetY, getRight() + offsetX, getBottom() + offsetY）`，设置View上下左右的位置，其中`offsetX/offsetY`是手势移动的距离。
+
+2. #### `offsetLeftAndRight()`与`offsetTopAndBottom()`
+
+   使用了第一种`layout`类似。
+
+3. #### `LayoutParams`（改变布局参数）
+
+   `LayoutParams`保存这`View`的布局参数，改变该对象中的属性值，然后`setLayoutParams(layoutParams)`即可改变`View`的属性。
+
+4. 动画
+
+5. `scollTo`与`scollBy`
+
+   `scollTo(x,y)`表示移动到一个具体的坐标点，而`scollBy(dx,dy)`则表示移动的增量为`dx`、`dy`。`scollTo`、`scollBy`移动的是`View`的内容，如果在`ViewGroup`中使用则是移动他所有的子`View`。
+
+   这两个方法进行滑动时，整个过程是瞬时完成的，体验不好，很少使用。但是会使用在当列表滑动了特别多之后，双击某个地方触发回到顶部的场景中，可用这个方法先瞬间回到离顶部距离不大的地方，然后再使用其他方法进行顺滑回到顶部，这样效果比单一的实现方案更优秀。
+
+6. `Scroller`
+
+   具体的使用可以看如下的样例，已对代码进行了注释：
+
+   ```java
+   public class ScrollerView extends View {
+       private Scroller scroller;
+   
+       public ScrollerView(Context context) {
+           this(context, null);
+       }
+   
+       public ScrollerView(Context context, @Nullable AttributeSet attrs) {
+           this(context, attrs, 0);
+       }
+   
+       public ScrollerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+           super(context, attrs, defStyleAttr);
+           init();
+       }
+   
+       private void init() {
+           // step1：初始化时创建对象
+           scroller = new Scroller(getContext());
+       }
+   
+       // step3：draw时会调用该方法
+       @Override
+       public void computeScroll() {
+           super.computeScroll();
+           // computeScrollOffset为true表示动画没有结束
+           if (scroller.computeScrollOffset()) {
+               // 注意需要调用父容器的scrollTo方法
+               ((View) getParent()).scrollTo(scroller.getCurrX(), scroller.getCurrY());
+               // 继续触发draw，从而实现移动
+               invalidate();
+           }
+       }
+   
+       // step2：外部调用该自定义的方法，方法中触发scroller.startScroll()
+       public void smoothScrollTo(int destX, int destY) {
+           int scrollX = getScrollX();
+           int dx = destX - scrollX;
+           int scrollY = getScrollY();
+           int dy = destY - scrollY;
+           // dx, dy正值表示往屏幕坐标原点方向移动
+           scroller.startScroll(scrollX, scrollY, dx, dy, 3000);
+           // 触发绘制
+           invalidate();
+       }
+   }
+   ```
+
+   `Scroller`起到了类似属性动画中估值器的作用，根据需要移动的距离，以及所需要的时间，计算出当前时间节点`View`需要移动到的坐标位置，最后再借助`View`的`scrollTo`方法实现移动，这里需要注意，其实是当前`View`的父容器去调用`scrollTo`的。使用时只需要调用该自定义`View`新增的`smoothScrollTo`即可。
+
 ## 动画
 
 ### 1、帧动画
