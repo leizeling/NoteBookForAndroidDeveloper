@@ -186,6 +186,37 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
 
 `dispatchTouchEvent` > `onInterceptTouchEvent`（只在`ViewGroup`中有） > `onTouch`（通过`onTouchListener`） > `onTouchEvent` >`onClick`（通过`OnClickListener`）。
 
+### Activity与View的关系
+
+- `Activity`持有`Window`
+
+  `Window`是由其唯一实现类`PhoneWindow`创建的。
+
+- `PhoneWindow`中会创建`DecorView`
+
+  `DecorView`继承自`FrameLayout`；`DecorView`是`Window`的顶级`View`；根据不同情况给`DecorView`加载不同的布局。
+
+- `DecorView`的布局中包含`@android:id/content`
+
+  用于放置`Activity`中用户创建的布局。
+
+### 绘制过程
+
+#### onMeasure
+
+MeasureSpec类
+
+| 字段       |                             意义                             |
+| ---------- | :----------------------------------------------------------: |
+| `specMode` | View的测量模式（有如下三种）：<br />**UNSPECIFIED**：未指定<br />**AT_MOST**：最大模式，对应于`wrap_content`属性，只要尺寸不超过父控件允许的最大尺寸就行<br />**EXACTLY**：精确模式，对应于`match_parent`模式和具体的数值，父容器测量出`View`所需要的大小，也就是`sepcSize`的值 |
+| `specSize` |                        View的测量大小                        |
+
+
+
+#### onLayout
+
+#### onDraw
+
 ## 动画
 
 ### 1、帧动画
