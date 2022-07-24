@@ -1,3 +1,7 @@
+[TOC]
+
+------
+
 # 一、Android
 
 ## 四大组件
@@ -150,20 +154,20 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
 | `onInterceptTouchEvent(MotionEvent ev)` | 用来进行事件的拦截，在`dispatchTouchEvent()`方法中调用；<br />`View`没有提供该方法，该方法是在`ViewGroup`中；<br />返回`true`：拦截；返回`false`：不拦截，默认不拦截；<br />如果拦截了，则走当前`ViewGroup`的`onTouchEvent()`方法。 |
 |        `onTouchEvent(Motion Ev)`        |     用来处理点击事件，在`dispatchTouchEvent()`方法中调用     |
 
-#### 触摸事件由上往下的传递
+#### 事件分发由上往下传递
 
 1. 用来处理触摸事件，在`dispatchTouchEvent()`方法中调用；
 2. `ViewGroup`一般只考虑`onInterceptTouchEvent()`方法，因为一般我们不会去重写`dispatchTouchEvent()`方法；
 3. 根`ViewGroup`首先把点击事件交给`dispatchTouchEvent()`方法，如果该`ViewGroup`的`onInterceptTouchEvent()`返回`true`则交给自身的`onTouchEvent()`处理，否则传递给子元素的`dispatchTouchEvent()`处理，如此反复，直到最底层`View`，`View`的`dispatchTouchEven()`一般最终会调用`onTouchEvent()`。
 
-#### 事件处理由下往上的传递
+#### 事件处理由下往上传递
 
 1. 最底层的`View`的`onTouchEvent`返回`true`，则表示消费了事件；返回`false`，表示不做处理，则传递给父`View`的`onTouchEvent`处理，如果父`View`的`onTouchEvent`还是返回`false`，则继续向上传递，如此反复；
 2. 如果给`View`添加了`onTouchListener`并且`onTouch`返回了`true`，则`View`的`onTouchEvent`方法不会被调用，即前者的优先级高于后者；
 3. 如果给`View`添加了`onClickListener`，则在执行`onTouchEvent`方法时会去执行`OnClickListener`的`onClick`方法，即`onClick`的优先级最低；
 4. `View`的`OnTouchEvent`方法默认都会返回`true`，除非它是不可点击的`CLICLABLE`和`LONG_CLICLABLE`都为`false`，通过`OnClickLinstener`会自动将`CLICLABLE`置为`true`。
 
-#### `onTouch()`和`onTouchEvent()`
+#### onTouch()和onTouchEvent()
 
 相同点：
 
@@ -174,7 +178,7 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
 
 - `onTouch()`是`onTouchListener`接口中的函数，需要用户自己实现，`onTouchEvent()`是`View`自带的接口，`Android`提供了默认实现，子`View`可进行覆写。
 
-#### `onTouchListener`的`onTouch()`和`Activity`的`onTouchEvent()`
+#### onTouchListener的onTouch()和Activity的onTouchEvent()
 
 - 如果`onTouchListener`的`onTouch()`方法返回`true`，手放在`View`上时，`onTouch`会一遍一遍的调用；
 - 如果`onTouchListener`的`onTouch()`方法返回`false`，手放在`View`上时，`onTouch()`会执行一遍，`Activity`的`onTouchEvent()`会一遍一遍的执行;
@@ -216,6 +220,18 @@ MeasureSpec类
 #### onLayout
 
 #### onDraw
+
+### 自定义
+
+#### 自定义View
+
+自定义View包含自定义View和自定义ViewGroup，其中自定义View又可以细分为继承系统控件的和继承View的。
+
+#### 自定义组合控件
+
+自定义组合控件就是多个控件组合在一起成为一个新的控件；主要用来解决多次重复的使用功能同一类型的布局，比如标题栏、固定样式的Dialog等。
+
+定义的流程：定义XML布局、定义View、自定义属性、XML引用组合控件、调用组合控件的方法。
 
 ## 动画
 
@@ -855,10 +871,6 @@ Aspect Oriented Programing面向切片编程
 
 儿童模式、未成年模式、儿童长大
 
-## Gradle
-
-[Android依赖冲突解决](https://juejin.cn/post/7042951122872434696)
-
 ## DeepLink
 
 ## Kotlin
@@ -882,10 +894,6 @@ Aspect Oriented Programing面向切片编程
 ### ViewModel
 
 ### WorkManager
-
-## Android Studio
-
-[Android Studio查看Memery Indicator](https://juejin.cn/post/7044519584577093668)
 
 # 二、Java
 
@@ -1242,11 +1250,19 @@ Car <..  CarFactory
 
 [【工程化】上传Android项目到Github](https://juejin.cn/post/7085016774483116040)
 
+## Android Studio
+
+[Android Studio查看Memery Indicator](https://juejin.cn/post/7044519584577093668)
+
+## Gradle
+
+[Android依赖冲突解决](https://juejin.cn/post/7042951122872434696)
+
 # 九、面试题
 
 # 十、学习资料
 
-### Android方面
+## Android方面
 
 《第一行代码》
 
@@ -1262,7 +1278,7 @@ Car <..  CarFactory
 
 JsonChao公众号
 
-### Java方面
+## Java方面
 
 《Effective Java》
 
@@ -1274,7 +1290,19 @@ Java核心知识点学习手册
 
 [HOW2J.CN](https://how2j.cn/)
 
-### 数据结构和算法方面
+## 设计模式方面
+
+《Android源码设计模式解析与实战》
+
+极客时间-设计模式之美
+
+## 重构方面
+
+《重构 - 改善既有代码的设计》
+
+[31天重构学习笔记](
+
+## 数据结构和算法方面
 
 《算法图解》
 
@@ -1284,19 +1312,9 @@ Java核心知识点学习手册
 
 [菜鸟教程](https://www.runoob.com/w3cnote/sort-algorithm-summary.html)
 
-### 重构方面
+https://www.cnblogs.com/KnightsWarrior/p/31DaysOfRefactoring.html)
 
-《重构 - 改善既有代码的设计》
-
-[31天重构学习笔记](https://www.cnblogs.com/KnightsWarrior/p/31DaysOfRefactoring.html)
-
-### 设计模式方面
-
-《Android源码设计模式解析与实战》
-
-极客时间-设计模式之美
-
-### 计算机网络方面
+## 计算机网络方面
 
 [小林coding-图解网络](https://www.xiaolincoding.com)
 
