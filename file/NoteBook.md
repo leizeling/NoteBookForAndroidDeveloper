@@ -768,9 +768,21 @@ thread pool-1-thread-2 execute task 9
 
 在了解了以上几种线程池之后，工作中就可以根据实际的业务场景进行合理的选择使用了。
 
+## 网络
+
+### Okhttp
+
+### Retrofit
+
 ## 进程间通信
 
 ## 持久化存储
+
+### 文件存储
+
+### SharedPreferences
+
+### SQLite
 
 ## 序列化与反序列化
 
@@ -806,7 +818,7 @@ thread pool-1-thread-2 execute task 9
 
 ### MVP
 
-### PVVM
+### MVVM
 
 ### MPI
 
@@ -992,6 +1004,8 @@ class Test {
 ## 动态化
 
 ## 跨平台
+
+Flutter
 
 ## 热修复
 
@@ -1454,7 +1468,7 @@ Java核心知识点学习手册
 
 《重构 - 改善既有代码的设计》
 
-[31天重构学习笔记](
+[31天重构学习笔记](https://www.cnblogs.com/KnightsWarrior/p/31DaysOfRefactoring.html)
 
 ## 数据结构和算法方面
 
@@ -1465,8 +1479,6 @@ Java核心知识点学习手册
 [【扔物线课堂】HashMap源码解析](https://ke.qq.com/course/3323489#term_id=103454342)
 
 [菜鸟教程](https://www.runoob.com/w3cnote/sort-algorithm-summary.html)
-
-https://www.cnblogs.com/KnightsWarrior/p/31DaysOfRefactoring.html)
 
 ## 计算机网络方面
 
