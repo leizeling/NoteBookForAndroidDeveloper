@@ -228,9 +228,11 @@ View是Android所有控件的基类，同时ViewGroup也是继承自View。
 
   用于放置`Activity`中用户创建的布局。
 
-### 绘制过程
+### 绘制
 
-#### onMeasure
+#### 三大流程
+
+##### onMeasure
 
 MeasureSpec类
 
@@ -241,9 +243,70 @@ MeasureSpec类
 
 
 
-#### onLayout
+##### onLayout
 
-#### onDraw
+##### onDraw
+
+#### Canvas
+
+##### 范围裁剪
+
+方法有`clipRect`、`clipPath`
+
+##### 几何变换
+
+几何的变换本质是对坐标系的变换，而不是对画布的变换，所以在进行多个变换时需要按照逆序进行写代码，下面是几种变换的方法。
+
+|     方法      | 描述 |
+| :-----------: | :--: |
+| `translate()` | 平移 |
+|  `rotate()`   | 旋转 |
+|   `scale()`   | 缩放 |
+|   `skew()`    | 偏斜 |
+
+需要注意所有View是**共用**一个画布，所以在变换前需要使用调用`Canvas.save()`，完成当前绘制之后，使用`Canvas.restore()`进行坐标系的恢复。
+
+下面是一个文字需要旋转一定角度的自定义TextView的实现样例：
+
+```java
+public class RotateTextView extends AppCompatTextView {
+  	// 忽略构造函数，以及实际角度需要通过自定义属性或者对外暴露方法来传入
+  
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.save();
+        // 以View的中心为旋转点，旋转45度
+        canvas.rotate(45, getMeasuredWidth() >> 1, getMeasuredHeight() >> 1);
+        super.onDraw(canvas);
+        canvas.restore();
+    }
+}
+```
+
+XML布局中使用该自定义控件
+
+```xml
+<com.example.android.viewsystem.cumstom.RotateTextView
+    android:background="@android:color/holo_red_light"
+    android:id="@+id/rotate_view"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:layout_centerInParent="true"
+    android:gravity="center"
+    android:text="Hello World!" />
+```
+
+显示效果
+
+<img src="../image/RotateTextView.png" width="30%">
+
+##### 绘制内容
+
+可以直接看`Canvas`类中以`draw`开头的众多方法。
+
+#### Paint
+
+#### Path
 
 ### 自定义
 
