@@ -34,6 +34,30 @@
 
 ### RecyclerView
 
+#### 基本组成
+
+- `RecyclerView.ViewHolder`
+
+  `ViewHolder`包装了`View`
+
+- `RecyclerView.Adapter`
+
+  | 需要实现的相关方法   | 说明                   |
+  | -------------------- | ---------------------- |
+  | `onCreateViewHolder` | 创建`ViewHolder`       |
+  | `onBindViewHolder`   | 给`ViewHolder`绑定数据 |
+  | `getItemCount`       | 返回列表数据的size大小 |
+
+- `LayoutManager`
+
+  | 类型                         | 描述       |
+  | ---------------------------- | ---------- |
+  | `LinearLayoutManager`        | 线性样式   |
+  | `GridLayoutManager`          | 栅格样式   |
+  | `StaggeredGridLayoutManager` | 瀑布流样式 |
+
+#### ItemDecoration
+
 [Android的clipToPadding与clipChildren](https://juejin.cn/post/7057545293252247566)
 
 ## View体系
@@ -225,21 +249,88 @@ MeasureSpec类
 
 #### 自定义View
 
-自定义View包含自定义View和自定义ViewGroup，其中自定义View又可以细分为继承系统控件的和继承View的。
+自定义`View`包含自定义`View`和自定义`ViewGroup`，其中自定义`View`又可以细分为继承系统控件的和继承`View`的。
+
+- 继承系统控件的自定义View
+
+  一般情况下我们在`onDraw()`方法中进行处理。
+
+- 继承View的自定义View
+
+  - 不仅要实现`onDraw()`方法，还要考虑`wrap_content`属性以及`padding`属性的设置，`wrap_content`的适配在`onMeasure()`中处理，`padding`的适配在`onDraw()`中处理。
+  - 为了方便配置自定义`View`，还可以对外提供自定义属性，基本步骤是：在`value`目录下创建`attrs.xml`来添加自定义属性，在自定义`View`的构造方法中解析自定义属性。
+  - 如果要改变触摸事件的逻辑，还要重写`onTouchEvent()`等触控事件的方法。
 
 #### 自定义组合控件
 
-自定义组合控件就是多个控件组合在一起成为一个新的控件；主要用来解决多次重复的使用功能同一类型的布局，比如标题栏、固定样式的Dialog等。
+自定义组合控件就是多个控件组合在一起成为一个新的控件；主要用来解决多次重复的使用功能同一类型的布局，比如标题栏、固定样式的`Dialog`等。
 
-定义的流程：定义XML布局、定义View、自定义属性、XML引用组合控件、调用组合控件的方法。
+定义的流程：定义`XML`布局、定义`View`、自定义属性、`XML`引用组合控件、调用组合控件的方法。
 
 ## 动画
 
 ### 1、帧动画
 
+使用的较少，因为是逐帧动画，需要用到多张图片资源，而图片资源有比较占用Apk的大小。
+
 ### 2、视图动画
 
+视图动画只是视觉上控件发生了移动，即当某个视图发生视图动画后，其相应的事件依然在动画前的地方。
+
+优点是效率比较高，使用也方便。
+
+下面是几种视图动画类型：
+
+| 类型                 | 说明       |
+| -------------------- | ---------- |
+| `AlphaAnimation`     | 透明度动画 |
+| `RotateAnimation`    | 旋转动画   |
+| `TranslateAnimation` | 平移动画   |
+| `ScaleAnimation`     | 缩放动画   |
+
 ### 3、属性动画
+
+#### ObjectAnimator
+
+调用其静态方法即可创建对象，对象包括一个进行动画的`View`，以及动画属性的名字；
+
+动画属性必须要有`get`和`set`方法，内部会通过Java反射机制调用`set`函数修改对象的属性值；
+
+如果属性没有`get`和`set`方法，可以通过自定义一个类（类中包含属性的`get`和`set`方法），对`View`进行封装。
+
+#### ValueAnimator
+
+该类不提供任何动画效果，它更像一个数值发生器，用来产生一定规律的数字，从而让调用者来控制动画的实现过程；
+
+在`ValueAnimator`的`AnimatorUpdateListener`中监听数值的变化，适当的在里面设置一些控件的属性从而实现`View`的动画。
+
+#### 动画的监听
+
+| 方案                                   | 说明                                                         |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `Animator.AnimatorListener`            | 动画监听接口，需要实现所有的接口方法（即使不需要用到）       |
+| `AnimatorListenerAdapter`              | 上一个方法的优化，可以不用实现所有的方法，只需按需`override`方法 |
+| `ValueAnimator.AnimatorUpdateListener` | 单接口方法，监听数值的变化                                   |
+
+#### 组合动画
+
+有时候一个完整的动画是由几个动画单元按照一定的逻辑组合在一起的，这时候就需要用到组合动画。
+
+`AnimatorSet.play()`方法会返回组合动画建造器`AnimatorSet.Builder`；`AnimatorSet.Builder`提供的方法有`after(Animator anim)`，`after(long delay)`，`before(Animator anim)`，`with(Animator anim)`，这些方法的作用顾名思义即可。
+
+#### XML中定义的动画
+
+`animator`文件夹下创建`XML`文件
+
+#### 插值器
+
+计算出当前时间完成的百分比。
+
+#### 估值器
+
+计算出具体的数值。
+
+#### 贝塞尔曲线
 
 ## 资源
 
