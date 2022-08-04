@@ -30,6 +30,60 @@
 
 ### 6、MotionLayout
 
+### 7、FlexboxLayout
+
+#### 典型布局案例
+
+<img src="../image/FlexboxLayout布局样例1.png" width="50%">
+
+左边展示`TextView`文本(单行)，内容可能很长，展示不下可以...省略，文本后面紧贴一个`ImageView`，`ImageView`不能被挤压，布局右侧展示一个`TextView`文本，内容很有限(不长)但是具体长度不定，内容需要全部展示，不能被压缩。简而言之就是图片和右边文本不能被压缩。另外文本和图片需要底边对齐（字体较小时图片高度大于文字高度，字体较大时文本高度会大于图片高度）。实现方案如下：
+
+```xml
+<com.google.android.flexbox.FlexboxLayout
+    android:layout_width="match_parent"
+    app:alignItems="flex_end"
+    android:layout_height="wrap_content">
+
+    <com.google.android.flexbox.FlexboxLayout
+        android:layout_width="match_parent"
+        app:alignItems="flex_end"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/left_tv"
+            android:layout_width="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_blue_bright"
+            android:text="左边文本可能很长" />
+
+        <ImageView
+            app:layout_flexShrink="0"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:src="@android:color/holo_red_light" />
+
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <TextView
+        android:layout_marginStart="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_bright"
+        android:text="右边文本长度有限，需全部展示"
+        app:layout_flexShrink="0" />
+
+</com.google.android.flexbox.FlexboxLayout>
+```
+
+主要是通过`layout_flexShrink`属性设置为`0`表示该控件不能被压缩，`app:alignItems="flex_end"`使得控件底部对齐。使用`LinearLayout`和`RelativeLayout`都是无法完成上面的要求的。
+
+`LinearLayout`虽然有`android:layout_weight`属性，不被挤压的部分不设置改属性，允许挤压部分设置该属性；但是一旦某控件设置了改属性，其将会直接占满剩余空间，即左侧文本即使内容很少，但是其TextView的宽度却是占满整个剩余空间的，导致`ImageView`直接被挤压到紧贴右侧文本的地方。
+
+同样使用`RelativeLayout`无法实现的，另外`RelativeLayout`需要底边对齐时，控件需要贴着父布局的底边，会导致父布局高度由原本是`wrap_content`变成`match_parent`的效果。
+
 ## 控件
 
 ### RecyclerView
