@@ -1117,6 +1117,111 @@ Aspect Oriented Programing面向切片编程
 
 ### WorkManager
 
+## 类的命名
+
+### 管理类命名
+
+* Bootstrap，Stater
+* Processor
+* Manager
+* Holder
+* Factory
+* Provider
+* Register
+* Engine
+* Service
+* Task
+
+### 传播类命名
+
+为了完成一些统计类或者全局类的功能，有些参数需要一传到底。传播类的对象就可以通过统一封装的方式进行传递，并在合适的地方拷贝或者更新。
+
+* Context
+* Propagator
+
+### 回调类命名
+
+* Handler，Callback，Trigger，Listener
+* Aware
+
+### 监控类命名
+
+* Metric
+* Estimator
+* Accumulator
+* Tracker
+
+### 内存管理类命名
+
+* Allocator
+* Chunk
+* Arena
+* Pool
+
+### 过滤检测类命名
+
+* Pipeline，Chain
+* Filter
+* Interceptor
+* Evaluator
+* Detector
+
+### 结构类命名
+
+* Cache
+* Buffer
+* Composite
+* Wrapper
+* Option，Param，Attribute
+* Tuple
+* Aggregator
+* Iterator
+* Batch
+* Limiter
+
+### 常见设计模式命名
+
+* Strategy
+* Adapter
+* Action，Command
+* Event
+* Delegate
+* Builder
+* Template
+* Proxy
+
+### 解析类命名
+
+* Converter，Resolver
+* Parser
+* Customizer
+* Formatter
+
+### 网络类命名
+
+* Packet
+
+* Protocol
+* Encoder，Decoder，Codec
+* Request，Response
+
+### CRUD命名
+
+* Controller，Service，Repository
+
+### 其他
+
+* Util，Helper
+* Mode，Type
+* Invoker，Invocation
+* Initializer
+* Future，Promise
+* Selector
+* Report
+* Constants
+* Accessor
+* Generator
+
 # 二、Java
 
 ## 原始数据类型
